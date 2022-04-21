@@ -14,8 +14,7 @@ struct AppCellModel {
     let rating: String?
 }
 
-final class AppCellModelFactory {
-    
+enum AppCellModelFactory {
     static func cellModel(from model: ITunesApp) -> AppCellModel {
         return AppCellModel(title: model.appName,
                             subtitle: model.company,
