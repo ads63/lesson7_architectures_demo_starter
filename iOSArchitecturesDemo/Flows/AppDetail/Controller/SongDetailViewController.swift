@@ -1,20 +1,20 @@
 //
-//  AppDetailViewController.swift
+//  SongDetailViewController.swift
 //  iOSArchitecturesDemo
 //
-//  Created by ekireev on 20.02.2018.
-//  Copyright © 2018 ekireev. All rights reserved.
+//  Created by Алексей Шинкарев on 19.04.2022.
+//  Copyright © 2022 ekireev. All rights reserved.
 //
 
 import UIKit
 
-final class AppDetailViewController: UIViewController {
-    public var app: ITunesApp?
+final class SongDetailViewController: UIViewController {
+    public var app: ITunesSong?
 
-    lazy var headerViewController = AppDetailHeaderViewController(app: self.app!)
-    lazy var appDescriptionViewController = AppDescriptionViewController(app: self.app!)
+    lazy var headerViewController = SongDetailHeaderViewController(app: self.app!)
+    lazy var songDetailsViewController = SongDescriptionViewController(app: self.app!)
 
-    init(app: ITunesApp) {
+    init(app: ITunesSong) {
         self.app = app
         super.init(nibName: nil, bundle: nil)
     }
@@ -52,18 +52,18 @@ final class AppDetailViewController: UIViewController {
     }
 
     private func addDescriptionViewController() {
-        self.addChild(self.appDescriptionViewController)
-        self.view.addSubview(self.appDescriptionViewController.view)
-        self.appDescriptionViewController.didMove(toParent: self)
-        self.appDescriptionViewController.view.translatesAutoresizingMaskIntoConstraints = false
+        self.addChild(self.songDetailsViewController)
+        self.view.addSubview(self.songDetailsViewController.view)
+        self.songDetailsViewController.didMove(toParent: self)
+        self.songDetailsViewController.view.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            self.appDescriptionViewController.view.topAnchor.constraint(equalTo:
+            self.songDetailsViewController.view.topAnchor.constraint(equalTo:
                 self.headerViewController.view.bottomAnchor),
-            self.appDescriptionViewController.view.leftAnchor.constraint(equalTo:
+            self.songDetailsViewController.view.leftAnchor.constraint(equalTo:
                 self.view.leftAnchor),
-            self.appDescriptionViewController.view.rightAnchor.constraint(equalTo:
+            self.songDetailsViewController.view.rightAnchor.constraint(equalTo:
                 self.view.rightAnchor),
-            self.appDescriptionViewController.view.bottomAnchor.constraint(equalTo:
+            self.songDetailsViewController.view.bottomAnchor.constraint(equalTo:
                 self.view.bottomAnchor),
         ])
     }
