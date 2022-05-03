@@ -6,16 +6,31 @@
 //  Copyright © 2022 ekireev. All rights reserved.
 //
 
+import Alamofire
 import UIKit
+
 final class SongsSearchPresenter {
+    let interactor: SearchInteractorInput
+    let router: SearchRouterInput
+
     // MARK: - view controller
 
     weak var viewInput: (UIViewController & SongSearchViewInputProtocol)?
 
     private let searchService = ITunesSearchService()
 
-    private func requestApps(with query: String) {
-        self.searchService.getSongs(forQuery: query) { [weak self] result in
+    init(interactor: SearchInteractorInput, router: SearchRouterInput) {
+        self.interactor = interactor
+        self.router = router
+    }
+}
+
+// MARK: - SearchViewOutput
+
+extension SongsSearchPresenter: SongSearchViewOutputProtocol {
+    func viewDidSearch(with query: String) {
+        self.viewInput?.throbber(show: true)
+        self.interactor.requestSongs(with: query) { [weak self] result in
             guard let self = self else { return }
             self.viewInput?.throbber(show: false)
             result
@@ -33,22 +48,7 @@ final class SongsSearchPresenter {
         }
     }
 
-    private func openAppDetails(with app: ITunesSong) {
-        let detaillViewController = SongDetailViewController(app: app)
-        self.viewInput?.navigationController?
-            .pushViewController(detaillViewController, animated: true)
-    }
-}
-
-// MARK: - SearchViewOutput
-
-extension SongsSearchPresenter: SongSearchViewOutputProtocol {
-    func viewDidSearch(with query: String) {
-        self.viewInput?.throbber(show: true)
-        self.requestApps(with: query)
-    }
-
     func viewDidSelect(_ app: ITunesSong) {
-        self.openAppDetails(with: app)
+        self.router.openDetails(for: app)
     }
 }

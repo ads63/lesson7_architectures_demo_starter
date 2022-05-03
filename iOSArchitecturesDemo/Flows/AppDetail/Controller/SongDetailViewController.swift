@@ -10,22 +10,26 @@ import UIKit
 
 final class SongDetailViewController: UIViewController {
     public var app: ITunesSong?
-
-    lazy var headerViewController = SongDetailHeaderViewController(app: self.app!)
+    var headerViewModel: SongHeaderViewModel?
+    var headerViewController: SongDetailHeaderViewController?
     lazy var songDetailsViewController = SongDescriptionViewController(app: self.app!)
 
     init(app: ITunesSong) {
-        self.app = app
         super.init(nibName: nil, bundle: nil)
+        self.app = app
+        self.headerViewModel =
+            SongHeaderViewModel(playService: FakePlaySongService())
+        self.headerViewController =
+            SongDetailHeaderViewController(viewModel: self.headerViewModel)
     }
 
     @available(*, unavailable)
-    required init?(coder aDecoder: NSCoder) { fatalError("init(coder:) has not been implemented")
-    }
+    required init?(coder aDecoder: NSCoder) { super.init(coder: aDecoder) }
 
     override func viewDidLoad() {
         super.viewDidLoad()
         self.configureUI()
+        self.headerViewModel?.song = self.app
     }
 
     private func configureUI() {
@@ -37,28 +41,36 @@ final class SongDetailViewController: UIViewController {
     }
 
     private func addHeaderViewController() {
-        self.addChild(self.headerViewController)
-        self.view.addSubview(self.headerViewController.view)
-        self.headerViewController.didMove(toParent: self)
-        self.headerViewController.view.translatesAutoresizingMaskIntoConstraints = false
+        guard let headerViewController = headerViewController else {
+            return
+        }
+        self.addChild(headerViewController)
+        self.view.addSubview(headerViewController.view)
+        self.headerViewController?.didMove(toParent: self)
+        self.headerViewController?.view
+            .translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            self.headerViewController.view.topAnchor.constraint(equalTo:
+            headerViewController.view.topAnchor.constraint(equalTo:
                 self.view.topAnchor),
-            self.headerViewController.view.leftAnchor.constraint(equalTo:
+            headerViewController.view.leftAnchor.constraint(equalTo:
                 self.view.leftAnchor),
-            self.headerViewController.view.rightAnchor.constraint(equalTo:
+            headerViewController.view.rightAnchor.constraint(equalTo:
                 self.view.rightAnchor),
         ])
     }
 
     private func addDescriptionViewController() {
+        guard let headerViewController = headerViewController else {
+            return
+        }
         self.addChild(self.songDetailsViewController)
         self.view.addSubview(self.songDetailsViewController.view)
         self.songDetailsViewController.didMove(toParent: self)
-        self.songDetailsViewController.view.translatesAutoresizingMaskIntoConstraints = false
+        self.songDetailsViewController.view
+            .translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             self.songDetailsViewController.view.topAnchor.constraint(equalTo:
-                self.headerViewController.view.bottomAnchor),
+                headerViewController.view.bottomAnchor),
             self.songDetailsViewController.view.leftAnchor.constraint(equalTo:
                 self.view.leftAnchor),
             self.songDetailsViewController.view.rightAnchor.constraint(equalTo:

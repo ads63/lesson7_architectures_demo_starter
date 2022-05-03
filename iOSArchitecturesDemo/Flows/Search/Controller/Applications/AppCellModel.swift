@@ -12,12 +12,14 @@ struct AppCellModel {
     let title: String
     let subtitle: String?
     let rating: String?
+    let downloadState: DownloadingApp.DownloadState
 }
 
 enum AppCellModelFactory {
-    static func cellModel(from model: ITunesApp) -> AppCellModel {
+    static func cellModel(from model: SearchAppCellModel) -> AppCellModel {
         return AppCellModel(title: model.appName,
                             subtitle: model.company,
-                            rating: model.averageRating >>- { "\($0)" })
+                            rating: model.averageRating >>- { "\($0)" },
+                            downloadState: model.downloadState)
     }
 }

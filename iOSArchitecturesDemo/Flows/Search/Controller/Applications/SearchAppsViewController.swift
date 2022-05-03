@@ -10,40 +10,39 @@ import UIKit
 
 final class SearchAppsViewController: UIViewController {
     // MARK: - Private Properties
-    
-    private let presenter: AppSearchViewOutputProtocol
-    
-    init(presenter: AppSearchViewOutputProtocol) {
-        self.presenter = presenter
+
+    private let viewModel: SearchViewModel
+
+    init(viewModel: SearchViewModel) {
+        self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
-    
+
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     private var searchView: SearchView {
         return self.view as! SearchView
     }
-    
+
     private let searchService = ITunesSearchService()
-    
-    // private var searchResults = [ITunesApp]()
-    var searchResults = [ITunesApp]() {
+
+    var searchResults = [SearchAppCellModel]() {
         didSet {
             self.searchView.tableView.isHidden = false
             self.searchView.tableView.reloadData()
             self.searchView.searchBar.resignFirstResponder()
         }
     }
-    
+
     private enum Constants {
         static let reuseIdentifier = "reuseId"
     }
-    
+
     // MARK: - Lifecycle
-    
+
     override func loadView() {
         super.loadView()
         self.view = SearchView()
@@ -56,11 +55,45 @@ final class SearchAppsViewController: UIViewController {
         self.searchView.tableView.register(AppCell.self, forCellReuseIdentifier: Constants.reuseIdentifier)
         self.searchView.tableView.delegate = self
         self.searchView.tableView.dataSource = self
+        self.bindViewModel()
     }
-    
+
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         self.throbber(show: false)
+    }
+
+    private func bindViewModel() {
+        // Во время загрузки данных показываем индикатор загрузки
+        self.viewModel.isLoading.addObserver(self) {
+            [weak self] isLoading, _ in
+            self?.throbber(show: isLoading)
+        }
+        // Если пришла ошибка, то отобразим ее в виде алерта
+        self.viewModel.error.addObserver(self) {
+            [weak self] error, _ in if let error = error {
+                self?.showError(error: error)
+            }
+        }
+        // Если вью-модель указывает, что нужно показать экран пустых результатов, то делаем это
+        self.viewModel.showEmptyResults.addObserver(self) {
+            [weak self] showEmptyResults, _ in
+
+            self?.searchView.emptyResultView.isHidden = !showEmptyResults
+            self?.searchView.tableView.isHidden = showEmptyResults
+        }
+        // При обновлении данных, которые нужно отображать в ячейках, сохраняем их и перезагружаем tableView
+        self.viewModel.cellModels.addObserver(self) {
+            [weak self] searchResults, _ in
+            self?.searchResults = searchResults
+        }
+    }
+
+    private func configure(cell: AppCell, with app: SearchAppCellModel) {
+        cell.onDownloadButtonTap = { [weak self] in
+            self?.viewModel.didTapDownloadApp(app)
+        }
+        cell.configure(with: AppCellModelFactory.cellModel(from: app))
     }
 }
 
@@ -79,17 +112,12 @@ extension SearchAppsViewController: UITableViewDataSource {
         let dequeuedCell = tableView
             .dequeueReusableCell(withIdentifier: Constants.reuseIdentifier,
                                  for: indexPath)
-        
+
         guard let cell = dequeuedCell as? AppCell else {
             return dequeuedCell
         }
-        
-        let app = self.searchResults[indexPath.row]
-        
-        let cellModel = AppCellModelFactory.cellModel(from: app)
-        
-        // Передаем данные через модель
-        cell.configure(with: cellModel)
+
+        self.configure(cell: cell, with: self.searchResults[indexPath.row])
         return cell
     }
 }
@@ -103,7 +131,7 @@ extension SearchAppsViewController: UITableViewDelegate {
         tableView.deselectRow(at: indexPath, animated: true)
         let app = self.searchResults[indexPath.row]
 
-        self.presenter.viewDidSelect(app)
+        self.viewModel.didSelectApp(app)
     }
 }
 
@@ -119,13 +147,14 @@ extension SearchAppsViewController: UISearchBarDelegate {
             searchBar.resignFirstResponder()
             return
         }
-        self.presenter.viewDidSearch(with: query)
+        self.viewModel.search(for: query)
     }
 }
 
 // MARK: - Input
 
-extension SearchAppsViewController: AppSearchViewInputProtocol {
+// extension SearchAppsViewController: AppSearchViewInputProtocol {
+extension SearchAppsViewController {
     func showError(error: Error) {
         let alert = UIAlertController(title: "Error",
                                       message: "\(error.localizedDescription)",
@@ -134,17 +163,17 @@ extension SearchAppsViewController: AppSearchViewInputProtocol {
         alert.addAction(actionOk)
         self.present(alert, animated: true, completion: nil)
     }
-    
+
     func showNoResults() {
         self.searchView.emptyResultView.isHidden = false
         self.searchResults = []
         self.searchView.tableView.reloadData()
     }
-    
+
     func hideNoResults() {
         self.searchView.emptyResultView.isHidden = true
     }
-    
+
     func throbber(show: Bool) {
         UIApplication.shared.isNetworkActivityIndicatorVisible = show
     }
