@@ -15,6 +15,7 @@ public struct ITunesSong: Decodable {
     public var artwork: String?
     public var country: String?
     public var durationMills: Int?
+    public var viewUrl: String?
     
     // MARK: - Codable
     
@@ -25,6 +26,7 @@ public struct ITunesSong: Decodable {
         case artwork = "artworkUrl100"
         case country
         case trackTimeMillis
+        case trackViewUrl
     }
     
     public init(from decoder: Decoder) throws {
@@ -35,6 +37,7 @@ public struct ITunesSong: Decodable {
         self.artwork = try? container.decode(String.self, forKey: .artwork)
         self.country = try? container.decode(String.self, forKey: .country)
         self.durationMills = try? container.decode(Int.self, forKey: .trackTimeMillis)
+        self.viewUrl = try? container.decode(String.self, forKey: .trackViewUrl)
     }
     // MARK: - Init
     
@@ -43,7 +46,8 @@ public struct ITunesSong: Decodable {
                   collectionName: String?,
                   artwork: String?,
                   country: String?,
-                  durationMills: Int?)
+                  durationMills: Int?,
+                  viewURL: String?)
     {
         self.trackName = trackName
         self.artistName = artistName
@@ -51,5 +55,6 @@ public struct ITunesSong: Decodable {
         self.artwork = artwork
         self.country = country
         self.durationMills = durationMills
+        self.viewUrl = viewURL
     }
 }

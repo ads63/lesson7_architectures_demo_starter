@@ -13,10 +13,9 @@ struct SongCellModel {
     let subtitle: String?
 }
 
-final class SongCellModelFactory {
-    
+enum SongCellModelFactory {
     static func cellModel(from model: ITunesSong) -> SongCellModel {
         return SongCellModel(title: model.trackName,
-                            subtitle: model.artistName)
+                             subtitle: model.artistName)
     }
 }

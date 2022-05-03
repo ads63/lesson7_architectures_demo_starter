@@ -7,9 +7,12 @@
 //
 
 import Alamofire
+protocol SearchServiceInterface {
+    func getApps(forQuery query: String, then completion: ((Result<[ITunesApp]>) -> Void)?)
+    func getSongs(forQuery query: String, completion: ((Result<[ITunesSong]>) -> Void)?)
+}
 
-final class ITunesSearchService {
-    
+final class ITunesSearchService: SearchServiceInterface {
     public typealias CompletionApps = (Result<[ITunesApp]>) -> Void
     public typealias CompletionSongs = (Result<[ITunesSong]>) -> Void
     
@@ -21,10 +24,10 @@ final class ITunesSearchService {
     
     private enum MediaType: String {
         case apps = "software"
-        case music = "music"
+        case music
     }
     
-    private struct Parameter {
+    private enum Parameter {
         static let query = "term"
         static let regionCode = "country"
         static let mediaType = "media"

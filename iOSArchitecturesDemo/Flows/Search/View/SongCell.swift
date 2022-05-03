@@ -9,6 +9,8 @@
 import UIKit
 
 final class SongCell: UITableViewCell {
+    var onPlayButtonTap: (() -> Void)?
+
     // MARK: - Subviews
     
     private(set) lazy var logoImageView: UIImageView = {

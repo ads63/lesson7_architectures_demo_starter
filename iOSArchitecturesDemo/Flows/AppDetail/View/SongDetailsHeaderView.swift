@@ -9,6 +9,8 @@
 import UIKit
 
 final class SongDetailHeaderView: UIView {
+    var onPlayButtonTap: (() -> Void)?
+
     // MARK: - Subviews
 
     private(set) lazy var imageView: UIImageView = {
@@ -36,10 +38,10 @@ final class SongDetailHeaderView: UIView {
         return label
     }()
 
-    private(set) lazy var openButton: UIButton = {
+    private(set) lazy var playButton: UIButton = {
         let button = UIButton(type: .system)
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.setTitle("Открыть", for: .normal)
+        button.setTitle("Play", for: .normal)
         button.backgroundColor = UIColor(white: 0.9, alpha: 1.0)
         button.layer.cornerRadius = 16.0
         return button
@@ -54,11 +56,45 @@ final class SongDetailHeaderView: UIView {
         return label
     }()
 
+    private(set) lazy var progressBar: UIProgressView = {
+        let progress = UIProgressView()
+        progress.translatesAutoresizingMaskIntoConstraints = false
+        progress.backgroundColor = UIColor(white: 0.9, alpha: 1.0)
+        progress.progressViewStyle = .default
+        progress.progressTintColor = .blue
+        return progress
+    }()
+
+    private(set) lazy var leftPlayLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.textColor = .lightGray
+        label.text = "00:00"
+        label.textAlignment = .left
+        label.font = UIFont.boldSystemFont(ofSize: 16.0)
+        return label
+    }()
+
+    private(set) lazy var rightPlayLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.textColor = .lightGray
+        label.text = "00:00"
+        label.textAlignment = .right
+        label.font = UIFont.boldSystemFont(ofSize: 16.0)
+        return label
+    }()
+
     // MARK: - Init
 
     override init(frame: CGRect) {
         super.init(frame: frame)
+        self.playButton.addTarget(self, action: #selector(self.playButtonTapped(_:)), for: .touchUpInside)
         self.setupLayout()
+    }
+
+    @IBAction func playButtonTapped(_ sender: UIButton) {
+        self.onPlayButtonTap?()
     }
 
     required init?(coder aDecoder: NSCoder) {
@@ -72,7 +108,10 @@ final class SongDetailHeaderView: UIView {
         self.addSubview(self.imageView)
         self.addSubview(self.titleLabel)
         self.addSubview(self.subtitleLabel)
-        self.addSubview(self.openButton)
+        self.addSubview(self.playButton)
+        self.addSubview(self.progressBar)
+        self.addSubview(self.leftPlayLabel)
+        self.addSubview(self.rightPlayLabel)
         NSLayoutConstraint.activate([
             self.imageView.topAnchor.constraint(equalTo:
                 self.safeAreaLayoutGuide.topAnchor, constant: 12.0),
@@ -96,15 +135,27 @@ final class SongDetailHeaderView: UIView {
                 .constraint(equalTo: self.titleLabel.leftAnchor),
             self.subtitleLabel.rightAnchor
                 .constraint(equalTo: self.titleLabel.rightAnchor),
-            self.openButton.leftAnchor
+            self.playButton.leftAnchor
                 .constraint(equalTo: self.imageView.rightAnchor,
                             constant: 16.0),
-            self.openButton.bottomAnchor
+            self.playButton.bottomAnchor
                 .constraint(equalTo: self.imageView.bottomAnchor),
-            self.openButton.widthAnchor.constraint(equalToConstant: 80.0),
-            self.openButton.heightAnchor.constraint(equalToConstant: 32.0),
+            self.playButton.widthAnchor.constraint(equalToConstant: 80.0),
+            self.playButton.heightAnchor.constraint(equalToConstant: 32.0),
+            self.progressBar.topAnchor.constraint(equalTo: self.imageView.bottomAnchor, constant: 16.0),
+            self.progressBar.leftAnchor.constraint(equalTo: self.leftAnchor, constant: 64.0),
+            self.progressBar.rightAnchor.constraint(equalTo: self.rightAnchor, constant: -64.0),
+            self.progressBar.heightAnchor.constraint(equalToConstant: 16.0),
+            self.leftPlayLabel.topAnchor.constraint(equalTo: self.progressBar.topAnchor),
+            self.leftPlayLabel.leftAnchor.constraint(equalTo: self.leftAnchor, constant: 8.0),
+            self.leftPlayLabel.heightAnchor.constraint(equalToConstant: 24.0),
+            self.leftPlayLabel.rightAnchor.constraint(equalTo: self.progressBar.leftAnchor),
+            self.rightPlayLabel.topAnchor.constraint(equalTo: self.progressBar.topAnchor),
+            self.rightPlayLabel.rightAnchor.constraint(equalTo: self.rightAnchor, constant: -8.0),
+            self.rightPlayLabel.heightAnchor.constraint(equalToConstant: 24.0),
+            self.rightPlayLabel.leftAnchor.constraint(equalTo: self.progressBar.rightAnchor),
             self.bottomAnchor
-                .constraint(equalTo: self.openButton.bottomAnchor, constant: 16.0)
+                .constraint(equalTo: self.rightPlayLabel.bottomAnchor, constant: 16.0),
         ])
     }
 }

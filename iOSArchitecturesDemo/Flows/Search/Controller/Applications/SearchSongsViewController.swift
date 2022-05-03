@@ -29,7 +29,6 @@ final class SearchSongsViewController: UIViewController {
     
     private let searchService = ITunesSearchService()
     
-    // private var searchResults = [ITunesSong]()
     var searchResults = [ITunesSong]() {
         didSet {
             self.searchView.tableView.isHidden = false
